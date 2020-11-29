@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -9,6 +9,7 @@ import {
   FlatList,
   Alert,
   Platform,
+  PermissionsAndroid,
 } from 'react-native';
 import Contacts from 'react-native-contacts';
 import Button from "./components/button";
@@ -45,11 +46,23 @@ function App() {
   const [selectedContacts, setSelectedContacts] = useState<PickableContact[]>([]);
   const [shouldShowModal, setModalStatus] = useState(false);
 
-  useEffect(function () {
-    loadContacts();
-  }, []);
+  async function loadContacts() {
+    if (Platform.OS === "android") {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.READ_CONTACTS, {
+          title: "Contacts",
+          message: "This app would like to view your contacts.",
+          buttonNeutral: "Ask Me Later",
+          buttonNegative: "Cancel",
+          buttonPositive: "OK"
+        });
 
-  function loadContacts() {
+        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+          Alert.alert("Error", "Contact permission is required!");
+          return null;
+        } 
+    }
+    
     Contacts.getAll()
       .then(contacts => {
         const namedContacts = contacts.map(c => {
@@ -72,6 +85,7 @@ function App() {
   }
 
   function showContactModal() {
+    loadContacts();
     setModalStatus(true);
     setTempSelectedContacts(selectedIndices);
   }

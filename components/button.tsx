@@ -1,7 +1,6 @@
 import React from "react";
 import {
   Text,
-  Platform,
   Pressable,
   StyleSheet,
 } from "react-native";
